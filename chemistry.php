@@ -532,14 +532,14 @@ $result_card_value = $conn->query($sql_card_value);
             width: 30px;
         }
 
-        .full-details-card {
+        .view-stock-card {
             display: flex;
             align-items: center;
             justify-self: flex-end;
             margin-left: 5%;
         }
 
-        .full-details-btn {
+        .view-stock-btn {
             height: 30px;
             border-radius: 10px;
             background: #4CC9F0;
@@ -552,7 +552,7 @@ $result_card_value = $conn->query($sql_card_value);
             transition: background 0.2s ease;
         }
 
-        .full-details-btn:hover {
+        .view-stock-btn:hover {
             background: #3a9ecb;
         }
 
@@ -1133,6 +1133,8 @@ $result_card_value = $conn->query($sql_card_value);
 
         <main>
             <img src="./images/logo-nobg.png" alt="background logo" class="logo-background">
+
+            <!-- Searchbar and Add Button -->
             <div class="add-search-section">
                 <div class="search-container">
                     <img src="./images/search_icon.png" alt="Search_Icon" class="searchbar-icon">
@@ -1159,7 +1161,7 @@ $result_card_value = $conn->query($sql_card_value);
                         <div class="two-column">
                             <!-- Category -->
                             <select id="category" name="category" class="dropdown-category-btn" required>
-                                <option value="" disabled selected>Select Category</option>
+                                <option value="" disabled selected>Select Category*</option>
                                 <option value="reagents">Reagents</option>
                                 <option value="calibrators">Calibrators</option>
                                 <option value="controls">Controls</option>
@@ -1283,9 +1285,9 @@ $result_card_value = $conn->query($sql_card_value);
                                         <img class="customize-icon" src="./images/trash.png" alt="edit-icon">
                                     </button>
                                 </div>
-                                <div class="full-details-card">
-                                    <button class="full-details-btn">
-                                        See Full Details
+                                <div class="view-stock-card">
+                                    <button class="view-stock-btn" onclick="location.href='./reagent_table.php'">
+                                        View Stock
                                     </button>
                                 </div>
                             </div>
@@ -1335,7 +1337,7 @@ $result_card_value = $conn->query($sql_card_value);
                                 <div class="edit-modal-card">
                                     <p class="edit-card-label">Category</p>
                                     <select id="categorySelect" name="category" class="dropdown-category-btn" required>
-                                        <option value="" disabled>Select Category</option>
+                                        <option value="" disabled>Select Category*</option>
                                         <option value="reagents">Reagents</option>
                                         <option value="calibrators">Calibrators</option>
                                         <option value="controls">Controls</option>
@@ -1386,9 +1388,9 @@ $result_card_value = $conn->query($sql_card_value);
                     </form>
                 </div>
             </div>
-
+        </main>
     </div>
-    </main>
+
 
     <script>
         // Collapse department reagent 
@@ -1561,6 +1563,7 @@ $result_card_value = $conn->query($sql_card_value);
         // Min level
         makeEditable('minLevelDisplay', 'minLevelInput', 'penMinLevel');
 
+
         // Notification Alerts Chatgpt
         document.addEventListener("DOMContentLoaded", () => {
             const alertBox = document.getElementById("siteAlert");
@@ -1590,7 +1593,7 @@ $result_card_value = $conn->query($sql_card_value);
                     alertMsg.textContent = message || "Reagent updated successfully.";
                     alertIcon.innerHTML = `
     <circle cx="12" cy="12" r="10" stroke="green" stroke-width="2" fill="none" />
-    <path d="M8 12l2 2 4-4" stroke="green" stroke-width="2" fill="none" />`;                
+    <path d="M8 12l2 2 4-4" stroke="green" stroke-width="2" fill="none" />`;
                 } else {
                     alertTitle.textContent = "Error";
                     alertMsg.textContent = message || "Something went wrong.";
@@ -1611,6 +1614,7 @@ $result_card_value = $conn->query($sql_card_value);
                 }, 5000);
             }
         });
+
 
         // Add Reagent Dropbox Chatgpt
         document.addEventListener('DOMContentLoaded', () => {
