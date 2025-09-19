@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body{
+            background-color: #180337;
+            margin: 0;
+            background-image: linear-gradient(
+                rgba(232, 232, 232, 0.1),
+                rgba(232, 232, 232, 0.1)
+            );
+            border: 2px solid #000000;  
+        }
+
+        /* Header Logo */
+        header{
+            height: 120px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            /* margin-bottom: 20px; */
+        }
+        .landing_page-logo{
+            grid-template-columns: 1;
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+        #landing-logo{
+            width: 88px;
+            height: 87px;
+            margin-left: 50px;
+            border-radius: 50%;
+        }
+
+        /* Header Nav bar */
+        .header-nav-list{
+            grid-column: 2;
+            align-self: start;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-top: 8px;
+            padding-right: 10px;
+        }
+        .header-nav-listname{
+            font-size: 15px;
+            color: white;
+            font-weight: 800;
+            text-decoration: none;
+        }
+        .header-nav-listname.nav-hover{
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .header-nav-listname.nav-hover:hover {
+            color: #E72BF4;
+        }
+        .header-nav-listname.nav-hover::after,
+        .header-nav-listname.active::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -3px;
+            width: 0%;
+            height: 2px;
+            transition: width 0.3s ease;
+        }
+        .header-nav-listname.nav-hover:hover::after {
+            width: 100%;
+            background-color: #E72BF4;
+        }
+        .header-nav-listname.active {
+            position: relative;
+            color: #00FFFF;
+        }
+
+        .header-nav-listname.active::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -4px;
+            width: 100%;
+            height: 2px;
+            background-color: #00FFFF;
+        }
+        .landing-btn{
+            border-radius: 25px;
+            padding: 8px 12px;
+            border-style: none;
+        }
+        .landing-btn:hover {
+            opacity: 0.8;
+            cursor: pointer;
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+        .pink{
+            background-color: #E72BF4;
+        }
+        .blue{
+            background-color: #2BB4F4;
+        }
+        main {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            margin-bottom: 10%;
+        }
+        /* Main body */
+
+        .carousel-container {
+            position: relative;
+            width: 90%;
+            height: 700px;
+            overflow: hidden;
+        }
+        
+        /* Carousel */
+        .box {
+            position: absolute;
+            inset: 0; 
+            width: 100%;
+            height: 100%;
+        }
+        .carousel{
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .carousel-track{
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        .slide {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .filter {
+            background: linear-gradient(#fffbfb 31%, #999797 100%);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        /* Text Inside the Carousel */
+        .textbox {
+            position: absolute;
+            inset: 0;
+            left: 8%;
+            top: 15%;
+            width: 48%;
+            z-index: 3;
+        }
+        .title-1 {
+            font-weight: 800;
+            font-size: 43px;
+            color: black;
+            font-family: 'Inter', sans-serif;
+        }
+        .text-1 {
+            font-weight: normal;
+            font-size: 23px;
+            color: black;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+        }
+        .btn-start{
+            display: flex;
+            align-self: flex-end;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(to right, #2bb4f4 0%, #ff5cf7 100%);
+            border-radius: 100px;
+            padding: 0px 20px;
+            margin-top: 10px; 
+            border-style: none;
+        }
+        .btn-text{
+            font-size: 25px;
+            font-weight: bold;
+        }
+        .arrow{
+            width:30px;
+            height:2px;
+            background:black;
+            position:relative;
+        }
+        .long-arrow{
+            position:absolute;
+            right:0;
+            top:-6px;
+            width:0;
+            height:0;
+            border-top:8px solid transparent;
+            border-bottom:8px solid transparent;
+            border-left:10px solid black;
+        }
+
+        .carousel-indicators{
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            position: absolute;
+            bottom: 7%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #bbb;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dot.current {
+            background-color: #333;
+        }
+
+        .our_service {
+            width: 90%;        
+        }
+
+        .service_title {
+            font-weight: bolder;
+            color: white;
+            font-size: 43px;
+            font-family: "Inter", sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 80px;
+        }
+        .row{
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0;
+        }
+        .col-1 {
+            grid-column: 1/2;
+            display: flex;
+            justify-content: center;
+        }
+        .col-2 {
+            grid-column: 2/3;
+            display: flex;
+            justify-content: center;
+        }
+        .col-3 {
+            grid-column: 3/4;
+            display: flex;
+            justify-content: center;
+        }
+        .section-box {
+            background-color: white;
+            border-radius: 20px;
+            width: 90%;
+            height: 525px;
+            display: flex;
+            justify-content: flex-start;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10%
+        }
+        .section-img {
+            width: 150px;
+            height: 150px;
+            margin-top: 50px;
+
+        }
+        .section-title {
+            color: black;
+            font-weight: bolder;
+            font-size: 20px;
+            text-align: center;
+            font-family: "Inter", sans-serif;
+        }
+        .section-textbox {
+            text-align: center;
+            width: 70%;
+            font-family: "Inter", sans-serif;
+            font-size: 15px;
+            font-weight: lighter;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #130133;
+            padding-top: 3%;
+            padding-bottom: 7%;
+            /* display: flex;
+            justify-content: center; */
+        }
+        .footer-title{
+            font-family: "Inter", sans-serif;
+            color: white;
+            font-size: 40px;
+            font-weight: bolder;
+            text-align: center;
+        }
+        .footer-margin {
+            margin-top: 7%;
+        }
+        .footer-contacts {
+            width: 80%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .footer-img {
+            height: 85px;
+            width: auto;
+        }
+        .footer-text {
+            font-family: "Inter", sans-serif;
+            font-weight: medium;
+            font-size: 20px;
+            color: white;
+            margin: 0;
+            margin-bottom: 3%;
+        }
+        .text-bolder {
+            font-weight: bolder; 
+        }
+        .text-bigger{
+            font-size: 25px;
+            margin-top: 4%;
+            margin-bottom: 12%;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="landing_page-logo">
+            <img src="./images/logo.png" alt="company-logo" id="landing-logo">
+        </div>
+        <div class="header-nav-list">
+            <a href="./" class="header-nav-listname nav-hover">HOME</a>
+            <a href="#" class="header-nav-listname nav-hover active">SERVICES</a>
+            <a href="" class="header-nav-listname nav-hover">ABOUT US</a>
+            <button class="landing-btn header-nav-listname pink" onclick="window.location.href='./login.html'">LOGIN</button>
+            <button class="landing-btn header-nav-listname blue" onclick="window.location.href='./register.html'">REGISTER</button>
+        </div>
+    </header>
+    <main>
+        <div class="carousel-container">
+            <div class="box carousel">
+                <div class="carousel-track">
+                    <img class="slide" src="./images/monitoring_stock-photo.jpg" alt="">
+                    <img class="slide" src="./images/inventory_stock-photo.jpeg" alt="">
+                    <img class="slide" src="./images/chemistry_stock-photo.jpg" alt="">
+                </div>
+            </div>
+
+            <div class="carousel-indicators">
+                <span class="dot current"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+
+            <!-- Filter  -->
+            <div class="box filter"></div>
+
+            <!-- Text inside the carousel -->
+            <div class="textbox">
+                <h1 class="title-1">
+Take Control of Your Reagents
+Smarter, Faster, Better 
+                </h1>
+                <pre class="text-1">
+On this system, you can monitor reagent 
+supplies and inventory just in time, 
+helping you stay organized and stocked.
+                </pre>
+
+                <div class="btn-container">
+                    <button class="btn-start">
+                        <p class="btn-text">Get Started!</p>
+                        <div class="arrow">
+                            <div class="long-arrow"></div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="our_service">
+            <h2 class="service_title">Our Services</h2>
+            
+            <div class="row">
+                <div class="col-1">
+                    <div class="section-box">
+                        <img class="section-img" src="./images/inventory_tracking.png" alt="">
+                        <h3 class="section-title">Unified Inventory Tracking</h3>
+                        <p class="section-textbox">
+                            Comprehensive tracking system for both 
+                            reagents and equipment in a single 
+                            platform. Monitor stock levels, equipment 
+                            status, and location information in real-time
+                            with detailed item-specific attributes and 
+                            history.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="section-box">
+                        <img class="section-img" src="./images/alert_bell.png" alt="">
+                        <h3 class="section-title">Smart Expiration Alerts</h3>
+                        <p class="section-textbox">
+                            Proactive notification system that alerts 
+                            users one month before reagent expiration 
+                            dates. Customizable alert thresholds with 
+                            escalating reminders ensure critical 
+                            reagents are never used past their 
+                            expiration date.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="section-box">
+                        <img class="section-img" src="./images/maintenance.png" alt="">
+                        <h3 class="section-title">Preventive Maintenance</h3>
+                        <p class="section-textbox">
+                            Automated scheduling and tracking of 
+                            equipment maintenance activities based on 
+                            usage patterns and manufacturer 
+                            recommendations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="row">
+                <div class="col-1">
+                    <div class="section-box">
+                        <img class="section-img" src="./images/analysis.png" alt="">
+                        <h3 class="section-title">Analytics</h3>
+                        <p class="section-textbox">
+                            Comprehensive reporting dashboard 
+                            measuring total quantities of reagents 
+                            and equipment, with detailed monthly 
+                            analysis of inventory movement.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="section-box">
+                        <img class="section-img" src="./images/schedule_task.png" alt="">
+                        <h3 class="section-title">Schedule Management</h3>
+                        <p class="section-textbox">
+                            Intelligent schedule tracking system for 
+                            equipment reservations, maintenance windows, 
+                            and calibration events. Prevent scheduling 
+                            conflicts and maximize equipment uptime through 
+                            optimized planning.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="section-box">
+                        <!-- <img class="section-img" src="./images/maintenance.png" alt="">
+                        <h3 class="section-title">Preventive Maintenance</h3>
+                        <p class="section-textbox">
+                            Automated scheduling and tracking of 
+                            equipment maintenance activities based on 
+                            usage patterns and manufacturer 
+                            recommendations.
+                        </p> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <h4 class="footer-title">Get In Touch</h4>
+        <div class="row footer-margin">
+            <div class="col-1">
+                <div class="footer-contacts">
+                    <img src="./images/location-icon.png" alt="" class="footer-img">
+                    <h5 class="footer-text text-bolder text-bigger">ADDRESS</h5>
+                    <p class="footer-text text-bolder">J&JK METS NAGA BRANCH</p>
+                    <p class="footer-text">NAGA, TABACO CITY OF POLANGUI</p>
+                    <p class="footer-text">M.H DEL PILAR ST. ZONE 65</p>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="footer-contacts">
+                    <img src="./images/call-icon.png" alt="" class="footer-img">
+                    <h5 class="footer-text text-bolder text-bigger">PHONE</h5>
+                    <p class="footer-text text-bolder">ALEX MAYER</p>
+                    <p class="footer-text">09XX-XXX-XXX | SMART</p>
+                    <p class="footer-text">09XX-XXX-XXXX | GLOBE</p>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="footer-contacts">
+                    <img src="./images/gmail-icon.png" alt="" class="footer-img">
+                    <h5 class="footer-text text-bolder text-bigger">EMAIL</h5>
+                    <p class="footer-text text-bolder">AlexMayer@gmail.com</p>
+                    <p class="footer-text text-bolder">The GreedyChef@gmail.com</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const container = document.querySelector('.carousel');
+        const track = container.querySelector('.carousel-track');
+        const slides = Array.from(container.querySelectorAll('.slide'));
+        const dots = Array.from(document.querySelectorAll('.carousel-indicators .dot'));
+
+        let index = 0;
+        const total = slides.length;
+
+        function showSlide(n) {
+          index = (n + total) % total;
+          track.style.transform = `translateX(-${index * 100}%)`;
+          dots.forEach(d => d.classList.remove('current'));
+          if (dots[index]) dots[index].classList.add('current');
+        }
+
+        dots.forEach((dot, i) => {
+          dot.addEventListener('click', () => {
+            showSlide(i);
+            resetAuto();
+          });
+        });
+
+        // autoplay
+        let timer = setInterval(() => showSlide(index + 1), 3000);
+
+        function resetAuto() {
+          clearInterval(timer);
+          timer = setInterval(() => showSlide(index + 1), 3000);
+        }
+
+        // keep transform aligned on resize
+        window.addEventListener('resize', () => showSlide(index));
+
+        // init
+        showSlide(0);
+    </script>
+
+</body>
+</html>

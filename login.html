@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #2bb4f4 14%, #ffffff 76%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            width: 40%;
+            height: 85vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .background-img {
+            position: absolute;
+            height: 65vh;
+            width: auto;
+            z-index: 1;
+            filter: blur(4px);
+            margin-top: 5%;
+        }
+
+        .login-box {
+            position: absolute;
+            z-index: 2;
+            width: 80%;
+            height: 85vh;
+            background-color: #999999;
+            opacity: 0.5;
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+        }
+
+        .login-content {
+            position: absolute;
+            z-index: 3;
+            width: 65%;
+            display: flex;
+            align-self: flex-start;
+            text-align: left;
+            flex-direction: column;
+        }
+
+        .login-title {
+            font-family: "Inter", sans-serif;
+            font-weight: bold;
+            font-size: 20px;
+            color: white;
+            text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+            margin-top: 5%;
+            margin-bottom: 10%;
+        }
+
+        .input-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 5%;
+        }
+
+        .input-box {
+            height: 45px;
+            width: 95%;
+            padding-left: 70px;
+            padding-right: 14px;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-sizing: border-box;
+            color: #fff;
+            font-size: 20px;
+            font-family: "Inter", sans-serif;
+        }
+
+        .input-box::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+            font-family: "Inter", sans-serif;
+            font-size: 20px;
+        }
+
+        .input-box:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(43, 180, 244, 0.25);
+        }
+
+        .form-icon {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            fill: black;
+            opacity: 0.8;
+        }
+
+        .form-icon img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .input-password {
+            height: 45px;
+            width: 95%;
+            padding-left: 70px;
+            padding-right: 40px;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-sizing: border-box;
+            color: #fff;
+            font-size: 20px;
+            font-family: "Inter", sans-serif;
+        }
+
+        .input-password:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(43, 180, 244, 0.25);
+        }
+
+        .eye-icon {
+            position: absolute;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            fill: black;
+            opacity: 0.8;
+            width: 20px;
+            height: 20px;
+            display: none;
+        }
+
+        .eye-open {
+            display: none;
+        }
+
+        /* Remember Me */
+        .remember-me {
+            display: inline-flex;
+            align-items: center;
+            font-size: 18px;
+            font-family: "Inter", sans-serif;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            margin: 8% 0;
+            width: auto;
+            white-space: nowrap;
+            gap: 5%;
+        }
+
+        .remember-me input[type="checkbox"] {
+            /* remove default style */
+            appearance: none;
+            /* for Safari */
+            -webkit-appearance: none;
+            /* for Firefox */
+            -moz-appearance: none;
+            /* for Good Luck */
+            accent-color: black;
+
+            width: 35px;
+            height: 25px;
+            border: 2px solid black;
+            border-radius: 3px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .remember-me input[type="checkbox"]:checked::after {
+            content: "✔";
+            color: black;
+            font-size: 25px;
+            position: absolute;
+            top: -7px;
+            left: 2px;
+        }
+
+        /* Login Button */
+        .login-btn {
+            height: 50px;
+            width: 95%;
+            font-family: "Inter", sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            background: #2BB4F4;
+            border-style: none;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(to right, #2BB4F4 0%, #0056b3 100%);
+            cursor: pointer;
+            transform: scale(1.05);
+        }
+
+        /* divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 16px;
+            font-family: "Inter", sans-serif;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 8%;
+            margin-bottom: auto;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            /* Make line equal length */
+            border-bottom: 1px solid white;
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: 10px;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: 10px;
+        }
+
+        a.back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 15px;
+            font-family: "Inter", sans-serif;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            width: auto;
+            gap: 10%;
+            text-decoration: none;
+        }
+
+        a.back-btn span {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        a.back-btn:hover span {
+            color: #0008ff;
+        }
+
+        a.back-btn span::after {
+            content: "";
+            position: absolute;
+            bottom: -3px;
+            /* distance below text */
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background-color: #0008ff;
+            ;
+            transition: width 0.3s ease;
+        }
+
+        a.back-btn:hover span::after {
+            width: 100%;
+        }
+
+        .back-icon {
+            height: 30px;
+            width: 30px;
+        }
+
+        a.back-btn:hover .back-icon {
+            transform: translateX(-5px);
+            transition: transform 0.3s ease;
+        }
+
+        a.register-link {
+            color: #000dff;
+            /* default link color */
+            text-decoration: none;
+            /* remove underline */
+            font-weight: bold;
+            /* make it stand out */
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        a.register-link:hover {
+            color: #2BB4F4;
+            /* lighter blue on hover */
+            text-shadow: 0px 0px 6px rgba(43, 180, 244, 0.6);
+            /* glow effect */
+        }
+
+        .alert {
+            padding: 10px;
+            width: 89%;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-family: "Inter", sans-serif;
+            display: none;
+            /* hidden by default */
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="#" class="back-btn" onclick="window.history.back(); return false;">
+        <img src="./images/back.png" alt="back" class="back-icon">
+        <span>Back</span>
+    </a>
+    <div class="login-container">
+        <img src="./images/logo-nobg.png" alt="" class="background-img">
+        <div class="login-box"></div>
+        <div class="login-content">
+            <h1 class="login-title">Sign-In</h1>
+
+            <div id="alertBox" class="alert"></div>
+
+
+            <!-- ./login_validator.php -->
+            <form action="login_validator.php" method="post">
+                <div class="input-container">
+                    <span class="form-icon">
+                        <img src="./images/user.png" alt="User">
+                    </span>
+                    <input type="text" name="username" id="username" class="input-box" placeholder="Username">
+                </div>
+                <div class="input-container">
+                    <span class="form-icon">
+                        <img src="./images/password.png" alt="Password">
+                    </span>
+                    <input type="password" name="password" id="password" class="input-password" placeholder="Password">
+                    <img src="./images/eye-close.png" alt="Hide" class="eye-icon eye-close">
+                    <img src="./images/eye-open.png" alt="Show" class="eye-icon eye-open">
+                </div>
+
+                <label class="remember-me">
+                    <input type="checkbox" name="remember" required />
+                    Remember me
+                </label>
+
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+
+            <div class="divider">
+                <span>
+                    Don’t have an account?
+                    <a href="./register.html" class="register-link">Register</a>
+                </span>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        const passwordInput = document.getElementById("password");
+        const eyeClose = document.querySelector(".eye-close");
+        const eyeOpen = document.querySelector(".eye-open");
+
+        passwordInput.addEventListener("input", () => {
+            if (passwordInput.value.length > 0) {
+                if (passwordInput.type === "password") {
+                    eyeClose.style.display = "block";
+                    eyeOpen.style.display = "none";
+                }
+                else {
+                    eyeOpen.style.display = "block";
+                    eyeClose.style.display = "none";
+                }
+            } else {
+                eyeClose.style.display = "none";
+                eyeOpen.style.display = "none";
+                passwordInput.type = "password";
+            }
+        });
+
+        eyeClose.addEventListener("click", () => {
+            passwordInput.type = "text";
+            eyeClose.style.display = "none";
+            eyeOpen.style.display = "block";
+        });
+
+        eyeOpen.addEventListener("click", () => {
+            passwordInput.type = "password";
+            eyeOpen.style.display = "none";
+            eyeClose.style.display = "block";
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get("status");
+        const message = urlParams.get("message");
+
+        if (status && message) {
+            const alertBox = document.getElementById("alertBox");
+            alertBox.textContent = decodeURIComponent(message);
+            alertBox.classList.add(status === "error" ? "error" : "success");
+            alertBox.style.display = "block"; // show alert
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,371 @@
+/* Body */
+body {
+    background-color: #ffffff;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    color: #1a1a1a;
+}
+
+/* Header Logo */
+header {
+    height: 120px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    margin-bottom: 50px;
+    background-color: #0056b3;
+    /* Strong blue header */
+    padding: 0 20px;
+}
+
+.landing_page-logo {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+#landing-logo {
+    width: 88px;
+    height: 87px;
+    border-radius: 50%;
+}
+
+/* Header Nav bar */
+.header-nav-list {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-nav-listname {
+    font-size: 15px;
+    color: white;
+    font-weight: 800;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.header-nav-listname:hover {
+    color: #cce6ff;
+}
+
+.header-nav-listname.active {
+    color: #00ffff;
+    /* Cyan for active */
+}
+
+/* Buttons */
+.landing-btn {
+    border-radius: 25px;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.landing-btn:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+.pink {
+    background-color: #e72bf4;
+    color: white;
+}
+
+.blue {
+    background-color: #2bb4f4;
+    color: white;
+}
+
+/* Main */
+main {
+    padding-bottom: 5%;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 80px;
+}
+
+/* Text Blocks */
+.item-text-display {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-description {
+    color: #0056b3;
+    /* Deep blue for headings */
+    font-size: 60px;
+    font-weight: 800;
+    margin: 0 0 10px 0;
+}
+
+.text-block {
+    color: #333;
+    font-size: 22px;
+    margin-left: 50px;
+    line-height: 1.6;
+}
+
+.btn-start-position {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-start {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background-color: #0080ff;
+    color: white;
+    border-radius: 100px;
+    padding: 10px 25px;
+    margin-top: 20px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: 40%;
+}
+
+.btn-start:hover {
+    background-color: #003d80;
+}
+
+.btn-text {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.arrow {
+    width: 50px;
+    height: 2px;
+    background: white;
+    position: relative;
+}
+
+.long-arrow {
+    position: absolute;
+    right: 0;
+    top: -6px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 10px solid white;
+}
+
+/* Carousel */
+.col-2 {
+    position: relative;
+}
+
+.carousel {
+    width: 500px;
+    height: 400px;
+    overflow: hidden;
+    position: absolute;
+    top: 65%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.slide {
+    width: 500px;
+    flex-shrink: 0;
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    filter: invert(1);
+}
+
+.carousel-button.prev {
+    left: 20px;
+}
+
+.carousel-button.next {
+    right: 20px;
+}
+
+.carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #bbb;
+    cursor: pointer;
+}
+
+.dot.current {
+    background-color: #0056b3;
+}
+
+/* Footer */
+footer {
+    background-color: #0056b3;
+    padding: 50px 20px;
+    margin-top: 60px;
+}
+
+.footer-title {
+    color: white;
+    font-size: 40px;
+    font-weight: bolder;
+    text-align: center;
+}
+
+.footer-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 40px;
+}
+
+.footer-contacts {
+    text-align: center;
+}
+
+.footer-img {
+    height: 65px;
+    margin-bottom: 15px;
+}
+
+.footer-text {
+    font-size: 18px;
+    color: white;
+    margin: 5px 0;
+}
+
+.text-bolder {
+    font-weight: bold;
+}
+
+.text-bigger {
+    font-size: 22px;
+    margin: 10px 0;
+}
+
+body {
+    background-color: #ffffff;
+    background-image: linear-gradient(rgba(0, 102, 204, 0.2),
+            /* lighter blue overlay */
+            rgba(0, 51, 102, 0.2)
+            /* darker navy overlay */
+        );
+    margin: 0;
+}
+
+.text-3rd,
+.text-4th,
+.text-5th,
+.text-6th {
+    color: #00cfff;
+}
+
+.pink {
+    background-color: #E72BF4;
+    /* keep pink for LOGIN */
+    color: white;
+}
+
+.blue {
+    background-color: #2BB4F4;
+    /* keep blue for REGISTER */
+    color: white;
+}
+
+.bg-light-ellipse {
+    position: absolute;
+    width: 480px;
+    height: 477px;
+    border-radius: 50%;
+    background: linear-gradient(#007bff 34%, #00cfff 91%);
+    /* blue gradient glow */
+    filter: blur(150px);
+    z-index: 0;
+    opacity: 0.7;
+}
+
+.ellipse1 {
+    top: 65%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: center center;
+}
+
+.ellipse2 {
+    top: 150%;
+    left: 25%;
+    transform: translate(-50%, -50%);
+    transform-origin: center center;
+}
+
+.ellipse3 {
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: center center;
+}
+
+.text-1st {
+    margin-left: 50px;
+}
+
+.text-2nd {
+    margin-left: 100px;
+}
+
+.text-3rd {
+    align-self: flex-end;
+    margin-left: 175px;
+    background: linear-gradient(to right, #007bff, #00cfff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.img-1 {
+    width: auto;
+    height: 430px;
+    transform: translate(20%, 12%);
+    transform-origin: center center;
+}
+
+.img-2 {
+    width: auto;
+    height: 430px;
+    transform: translate(10%, -25%);
+    transform-origin: center center;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.row2 {
+    margin-top: 15%;
+}
