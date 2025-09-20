@@ -9,9 +9,13 @@
 include "db.php";
 
 session_start();
+
 if (!isset($_SESSION['user_id'])) {
-    // user is not logged in → kick them back to login
     header("Location: ./login.html?status=error&message=" . urlencode("Please log in first"));
+}
+
+if (isset($_SESSION['current_reagent_id'])) {
+    unset($_SESSION['current_reagent_id']);
 }
 
 $sql_reagent_type = "SELECT COUNT(*) AS total_reagents FROM reagents";
@@ -1286,7 +1290,7 @@ $result_card_value = $conn->query($sql_card_value);
                                     </button>
                                 </div>
                                 <div class="view-stock-card">
-                                    <button class="view-stock-btn" onclick="location.href='./reagent_table.php'">
+                                    <button class="view-stock-btn" onclick="setReagentID('<?php echo $row['reagent_id']; ?>')">
                                         View Stock
                                     </button>
                                 </div>
@@ -1400,6 +1404,9 @@ $result_card_value = $conn->query($sql_card_value);
             submenu.classList.toggle("hide");
         });
 
+        function setReagentID(reagentID) {
+            location.href = "./set_reagent.php?id=" + reagentID;
+        }
 
         // Add Modal
         const modal = document.getElementById("modal");

@@ -1,9 +1,36 @@
 <?php
-// session_start();
-// if (!isset($_SESSION['user_id'])) {
-//     // user is not logged in → kick them back to login
-//     header("Location: ./login.html?status=error&message=" . urlencode("Please log in first"));
-// }
+
+include "db.php";
+
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ./login.html?status=error&message=" . urlencode("Please log in first"));
+}
+
+if (!isset($_SESSION['current_reagent_id'])) {
+    header("Location: chemistry.php?status=error&message=No+reagent+selected");
+    exit();
+}
+
+$reagent_id = $_SESSION['current_reagent_id'];
+
+$stmt = $conn->prepare("SELECT * FROM reagents WHERE reagent_id = ?");
+$stmt->bind_param("i", $reagent_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_array();
+
+$sql_reagent_stock = "SELECT * FROM reagent_stock WHERE reagent_id = $reagent_id";
+$result_reagent_stock = $conn->query($sql_reagent_stock);
+
+$sql_num_stock = "SELECT COUNT(*) AS num_stock FROM reagent_stock";
+$result_num_stock = $conn->query($sql_num_stock);
+$num_stocks = ($result_num_stock) ? $result_num_stock->fetch_assoc()['num_stock'] : 0;
+
+$sql_qty = "SELECT SUM(quantity) AS total_quantity FROM reagent_stock";
+$result_qty = $conn->query($sql_qty);
+$total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0;
+
 ?>
 
 <!DOCTYPE html>
@@ -14,9 +41,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>J&JMETS</title>
 
-    <!-- <link rel="stylesheet" href="./css/bootstrap.css"> -->
     <style>
-        /* Color aesthetic in the bg*/
+        /* Alert Css */
+        .site-alert {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1e1e1e;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+        }
+
+        .site-alert.show {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .site-alert.success {
+            border-left: 6px solid green;
+        }
+
+        .site-alert.error {
+            border-left: 6px solid red;
+        }
+
+        .site-alert-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
         .bg-light-ellipse {
             position: fixed;
             width: 480px;
@@ -494,27 +555,110 @@
             gap: 10px;
         }
 
-        .btn {
-            border: none;
+        .actions .btn {
             background: #4cc9f0;
-            color: white;
             padding: 5px 10px;
             border-radius: 4px;
+            color: white;
             font-size: 12px;
+            border: none;
             cursor: pointer;
         }
 
-        .btn.edit {
-            background: #4cc9f0;
+        .actions .add {
+            background-color: #29ae48ff;
         }
 
-        .btn.delete {
-            background: #e63946;
+        .actions .minus {
+            background-color: #e6bb0eff;
+        }
+
+        .actions .edit {
+            background-color: #4cc9f0;
+        }
+
+        .actions .delete {
+            background-color: #e63946;
+        }
+
+        .actions .btn:hover {
+            opacity: 0.8;
+        }
+
+        /* drawer */
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100%;
+            background: #fff;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+                "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+
+        .drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .drawer form {
+            padding: 8%;
+        }
+
+        .drawer form label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .drawer form input,
+        .drawer form select {
+            width: 95%;
+            padding: 4% 3%;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .drawer-submit-btn {
+            width: 100%;
+            background-color: #0090FF;
+            color: white;
+            padding: 3% 0;
+            border-radius: 10px;
+        }
+
+        .title {
+            border-left: 4px solid #4CC9F0;
+            padding-left: 10px;
         }
     </style>
 </head>
 
 <body>
+    <div id="siteAlert" class="site-alert">
+        <div class="site-alert-content">
+            <svg id="alertIcon" class="site-alert-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"></svg>
+            <div class="site-alert-text">
+                <strong id="alertTitle"></strong>
+                <p id="alertMsg"></p>
+            </div>
+            <button id="alertClose" class="site-alert-close">&times;</button>
+        </div>
+    </div>
     <div class="container-fluid">
         <div class="bg-light-ellipse ellipse1"></div>
         <div class="bg-light-ellipse ellipse2"></div>
@@ -561,7 +705,7 @@
     <div class="header">
         <ul class="breadcrumb">
             <li><a href="./chemistry.php" id="header-title" style="text-decoration: none;">Chemistry</a></li>
-            <li><a href="#">Reagent Name Stock</a></li>
+            <li><a href="#"><?php echo $row['reagent_name'] ?></a></li>
         </ul>
 
         <div class="header-actions">
@@ -591,7 +735,7 @@
     <main class="main-content">
         <img src="./images/logo-nobg.png" alt="background logo" class="logo-background">
 
-        <!--  -->
+        <!-- Search and Add Section -->
         <div class="add-search-section">
             <div class="search-container">
                 <img src="./images/search_icon.png" alt="Search_Icon" class="searchbar-icon">
@@ -599,7 +743,7 @@
                 <input type="text" class="searchbar-reagent" placeholder="Search Stocks for [Chemistry]">
             </div>
             <div class="add-item-section">
-                <button id="add-modal" class="add-item-btn">
+                <button onclick="openDrawer('drawer')" class="add-item-btn">
                     + ADD ITEM
                 </button>
             </div>
@@ -607,9 +751,10 @@
 
         <!-- Stats info -->
         <div class="info-section">
-            <div class="info-text">Number of Rows: <?php echo '0'; ?></div>
-            <div class="info-text">Total Stock: <?php echo '0'; ?> units</div>
+            <div class="info-text">Number of Rows: <?php echo $num_stocks; ?></div>
+            <div class="info-text">Total Stock: <?php echo $total_stocks; ?> units</div>
             <div class="info-text">Expiring Soon: <?php echo '0'; ?> </div>
+            <div class="info-text">Below Minimum: <?php echo '0'; ?> </div>
         </div>
 
         <!-- Reagent Table -->
@@ -620,8 +765,8 @@
                         <tr>
                             <th>Lot No.</th>
                             <th>Reagent Name</th>
-                            <th>Client</th>
-                            <th>Date Delivered</th>
+                            <th>Distributor</th>
+                            <th>Date Arrived</th>
                             <th>Expiry Date</th>
                             <th>Expiry Status</th>
                             <th>Quantity</th>
@@ -629,213 +774,192 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status soon">Expired Soon</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status expired">Expired</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status soon">Expired Soon</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status expired">Expired</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>001</td>
-                            <td>Reagent Name</td>
-                            <td>Client A</td>
-                            <td>Oct 1, 2025</td>
-                            <td>Dec 15, 2025</td>
-                             <td><span class="status ok">OK</span></td>
-                            <td>50 Units</td>  
-                            <td class="actions">
-                                <button class="btn edit">Edit</button>
-                                <button class="btn delete">Delete</button>
-                            </td>
-                        </tr>
+                        <?php while ($stock = $result_reagent_stock->fetch_assoc()): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($stock['lot_no']); ?></td>
+                                <td><?php echo htmlspecialchars($row['reagent_name'] ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($stock['distributor']); ?></td>
+                                <td><?php echo htmlspecialchars($stock['date_arrived']); ?></td>
+                                <td><?php echo htmlspecialchars($stock['expiry_date']); ?></td>
+                                <td><span class="status ok">OK</span></td>
+                                <td><?php echo htmlspecialchars($stock['quantity']); ?></td>
+                                <td class="actions">
+                                    <button class="btn add" onclick="openDrawer('addStockDrawer')">+</button>
+                                    <button class="btn minus" onclick="openDrawer('removeStockDrawer')">-</button>
+                                    <button class="btn edit">Edit</button>
+                                    <button class="btn delete">Delete</button>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
                     </tbody>
+
                 </table>
             </div>
         </div>
+
+        <!-- Drawer -->
+        <div id="drawer" class="drawer">
+            <div class="drawer-header">
+                <h2 class="title">Add Stock</h2>
+                <button onclick="closeDrawer('drawer')">&times;</button>
+            </div>
+            <form action="add_stock.php" method="post">
+                <input type="hidden" name="reagent_id" value="<?php echo $reagent_id; ?>">
+
+                <label>Reagent Name</label>
+                <input type="text" value="<?php echo htmlspecialchars($row['reagent_name']); ?>" readonly>
+
+                <label>Lot No.</label>
+                <input type="text" name="lot_no" required>
+
+                <label>Distributor</label>
+                <select name="distributor" required>
+                    <option value="" disabled selected>Select Distributor</option>
+                    <option value="Distributor A">Distributor A</option>
+                    <option value="Distributor B">Distributor B</option>
+                </select>
+
+                <label>Date Received</label>
+                <input type="date" name="date_arrived">
+
+                <label>Expiry Date</label>
+                <input type="date" name="expiry_date">
+
+                <label>Quantity</label>
+                <input type="number" name="quantity">
+
+                <button type="submit" class="drawer-submit-btn">Save</button>
+            </form>
+        </div>
+
+        <!-- Add Drawer -->
+        <!-- Add Stock Drawer -->
+        <div id="addStockDrawer" class="drawer">
+            <div class="drawer-header">
+                <h3 class="title">Add Stock</h3>
+                <button onclick="closeDrawer('addStockDrawer')">✖</button>
+            </div>
+            <form action="update_stock.php" method="POST">
+                <!-- Identify reagent -->
+                <input type="hidden" name="reagent_id" value="<?php echo $reagent_id; ?>">
+                <!-- <input type="hidden" name="stock_id" value="<?php echo $stock_form['stock_id']; ?>"> -->
+
+                <input type="hidden" name="action_type" value="add">
+
+                <label>Quantity to Add</label>
+                <input type="number" name="quantity" min="1" required>
+
+                <label>Client</label>
+                <select name="client">
+                    <option value="" disabled selected>Select Client</option>
+                    <option value="Client A">Client A</option>
+                    <option value="Client B">Client B</option>
+                </select>
+
+                <label>Date Arrived</label>
+                <input type="date" name="date_action" required>
+
+                <button type="submit" class="drawer-submit-btn">Add Stock</button>
+            </form>
+        </div>
+
+        <!-- Remove Stock Drawer -->
+        <div id="removeStockDrawer" class="drawer">
+            <div class="drawer-header">
+                <h3 class="title">Remove Stock</h3>
+                <button onclick="closeDrawer('removeStockDrawer')">✖</button>
+            </div>
+            <form action="update_stock.php" method="POST">
+                <input type="hidden" name="reagent_id" value="<?php echo $reagent_id; ?>">
+                 <!-- <input type="hidden" name="stock_id" value="<?php echo $stock['stock_id']; ?>"> -->
+                <input type="hidden" name="action_type" value="remove">
+
+                <label>Quantity to Remove</label>
+                <input type="number" name="quantity" min="1" required>
+
+                <label>Client</label>
+                <select name="client">
+                    <option value="" disabled selected>Select Client</option>
+                    <option value="Client A">Client A</option>
+                    <option value="Client B">Client B</option>
+                </select>
+
+                <label>Date Delivered</label>
+                <input type="date" name="date_action" required>
+
+                <button type="submit" class="drawer-submit-btn">Remove Stock</button>
+            </form>
+        </div>
+
     </main>
 
-    <!-- <script src="./js/bootstrap.js"></script> -->
     <script>
+        // Reagent Submenu 
         document.getElementById("reagents").addEventListener("click", function(e) {
             e.preventDefault();
             const submenu = this.nextElementSibling;
             submenu.classList.toggle("hide");
+        });
+
+        // Drawer
+
+        function openDrawer(id) {
+            document.getElementById(id).classList.add('open');
+        }
+
+        function closeDrawer(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        // Notification Alerts Chatgpt
+        document.addEventListener("DOMContentLoaded", () => {
+            const alertBox = document.getElementById("siteAlert");
+            const alertIcon = document.getElementById("alertIcon");
+            const alertTitle = document.getElementById("alertTitle");
+            const alertMsg = document.getElementById("alertMsg");
+            const alertClose = document.getElementById("alertClose");
+
+            const params = new URLSearchParams(window.location.search);
+            const status = params.get("status");
+            const message = params.get("message");
+
+            console.log("Status param:", status);
+            console.log("Message param:", message);
+
+            if (status) {
+                alertBox.classList.add("show", status);
+
+                if (status === "success") {
+                    alertTitle.textContent = "Success";
+                    alertMsg.textContent = message || "Stock added successfully.";
+                    alertIcon.innerHTML = `
+    <circle cx="12" cy="12" r="10" stroke="green" stroke-width="2" fill="none" />
+    <path d="M8 12l2 2 4-4" stroke="green" stroke-width="2" fill="none" />`;
+                } else if (status === "success-update") {
+                    alertTitle.textContent = "Success";
+                    alertMsg.textContent = message || "Stock Quantity is updated successfully.";
+                    alertIcon.innerHTML = `
+    <circle cx="12" cy="12" r="10" stroke="green" stroke-width="2" fill="none" />
+    <path d="M8 12l2 2 4-4" stroke="green" stroke-width="2" fill="none" />`;
+                } else {
+                    alertTitle.textContent = "Error";
+                    alertMsg.textContent = message || "Something went wrong.";
+                    alertIcon.innerHTML = `
+    <circle cx="12" cy="12" r="10" stroke="red" stroke-width="2" fill="none" />
+    <line x1="9" y1="9" x2="15" y2="15" stroke="red" stroke-width="2" />
+    <line x1="15" y1="9" x2="9" y2="15" stroke="red" stroke-width="2" />`;
+                }
+            }
+
+            alertClose?.addEventListener("click", () => {
+                alertBox.classList.remove("show");
+            });
+
+            if (status) {
+                setTimeout(() => {
+                    alertBox.classList.remove("show");
+                }, 5000);
+            }
         });
     </script>
 </body>
