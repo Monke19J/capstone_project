@@ -1,20 +1,21 @@
 <?php
 include "db.php";
-session_start(); // REQUIRED before using $_SESSION
+session_start();
 
 $username   = $_POST['Username'] ?? '';
 $email      = $_POST['email'] ?? '';
 $password   = $_POST['password'] ?? '';
 $terms      = $_POST['terms_condition'] ?? '';
+$user_type = "engineer";
 
-if ($username && $email && $user_type && $password && $terms) {
+if ($username && $email && $password && $terms) {
     // Hash the password before storing
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    $sql = "INSERT INTO users (username, email, password)
-            VALUES (?, ?, ?)";
+    $sql = "INSERT INTO users (username, email, password, user_type)
+            VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sss", $username, $email, $hashedPassword);
+    $stmt->bind_param("ssss", $username, $email, $hashedPassword, $user_type);
 
     if ($stmt->execute()) {
         // Get the ID of the newly registered user
@@ -25,7 +26,7 @@ if ($username && $email && $user_type && $password && $terms) {
         $_SESSION['username'] = $username;
 
         if (true) {
-            header("Location: ./dashboard_sale.php");
+            header("./dashboard_engineering.php");
         } else {
             header("Location: ./register.html?status=error&message=" . urlencode("Unknown account type"));
         }
