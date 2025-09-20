@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 19, 2025 at 01:02 PM
+-- Generation Time: Sep 20, 2025 at 08:51 PM
 -- Server version: 11.5.2-MariaDB
 -- PHP Version: 8.2.12
 
@@ -111,6 +111,65 @@ INSERT INTO `reagents` (`reagent_id`, `reagent_type`, `reagent_name`, `quantity`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `reagent_stock`
+--
+
+CREATE TABLE `reagent_stock` (
+  `stock_id` int(11) NOT NULL,
+  `reagent_id` int(11) NOT NULL,
+  `lot_no` varchar(100) NOT NULL,
+  `distributor` varchar(100) NOT NULL,
+  `date_arrived` date NOT NULL,
+  `expiry_date` date NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reagent_stock`
+--
+
+INSERT INTO `reagent_stock` (`stock_id`, `reagent_id`, `lot_no`, `distributor`, `date_arrived`, `expiry_date`, `quantity`, `created_at`, `updated_at`) VALUES
+(1, 1, '1', 'Distributor A', '2025-09-20', '2025-11-20', 43, '2025-09-20 15:12:36', '2025-09-20 18:43:49');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stock_history`
+--
+
+CREATE TABLE `stock_history` (
+  `history_id` int(11) NOT NULL,
+  `reagent_id` int(11) NOT NULL,
+  `stock_id` int(11) DEFAULT NULL,
+  `action_type` enum('add','remove') NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `client_id` int(11) DEFAULT NULL,
+  `date_action` date NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `remarks` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `stock_history`
+--
+
+INSERT INTO `stock_history` (`history_id`, `reagent_id`, `stock_id`, `action_type`, `quantity`, `client_id`, `date_action`, `created_at`, `remarks`) VALUES
+(1, 1, NULL, 'add', 10, 0, '2025-09-21', '2025-09-20 17:48:26', NULL),
+(2, 1, NULL, 'add', 20, 0, '2025-09-21', '2025-09-20 18:03:17', NULL),
+(3, 1, NULL, 'add', 10, 0, '2025-09-05', '2025-09-20 18:03:43', NULL),
+(4, 1, NULL, 'remove', 40, 0, '2025-09-22', '2025-09-20 18:04:08', NULL),
+(5, 1, NULL, 'add', 10, NULL, '2025-09-21', '2025-09-20 18:05:29', NULL),
+(6, 1, NULL, 'remove', 10, NULL, '2025-09-08', '2025-09-20 18:05:47', NULL),
+(7, 1, NULL, 'add', 10, NULL, '2025-09-04', '2025-09-20 18:06:25', NULL),
+(8, 1, NULL, 'add', 21, NULL, '2025-09-01', '2025-09-20 18:15:12', NULL),
+(9, 1, NULL, 'remove', 30, NULL, '2025-09-21', '2025-09-20 18:15:33', NULL),
+(14, 1, NULL, 'add', 21, NULL, '2025-09-21', '2025-09-20 18:43:49', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -127,7 +186,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `user_type`) VALUES
-(1, 'admin', '', 'admin', 'super_admin');
+(1, 'admin', 'admin@gmail.com', '$2y$10$e83PxKhAxCeIq4YivZgXkOlS.HeAQ.L2KJJdKsFlCs88s5y7l5EOC', 'super_admin'),
+(2, 'engineer', 'engineer@gmail.com', '$2y$10$DinM9dAr7nmeJF/uxh3kReNDbBKgP8Yo/MpjGU2zrAAPriQmbEcmu', 'engineer');
 
 --
 -- Indexes for dumped tables
@@ -152,6 +212,21 @@ ALTER TABLE `alert_receivers`
 --
 ALTER TABLE `reagents`
   ADD PRIMARY KEY (`reagent_id`);
+
+--
+-- Indexes for table `reagent_stock`
+--
+ALTER TABLE `reagent_stock`
+  ADD PRIMARY KEY (`stock_id`),
+  ADD KEY `fk_reagent` (`reagent_id`);
+
+--
+-- Indexes for table `stock_history`
+--
+ALTER TABLE `stock_history`
+  ADD PRIMARY KEY (`history_id`),
+  ADD KEY `reagent_id` (`reagent_id`),
+  ADD KEY `stock_id` (`stock_id`);
 
 --
 -- Indexes for table `users`
@@ -182,10 +257,22 @@ ALTER TABLE `reagents`
   MODIFY `reagent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
+-- AUTO_INCREMENT for table `reagent_stock`
+--
+ALTER TABLE `reagent_stock`
+  MODIFY `stock_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `stock_history`
+--
+ALTER TABLE `stock_history`
+  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
@@ -202,6 +289,19 @@ ALTER TABLE `alerts`
 --
 ALTER TABLE `alert_receivers`
   ADD CONSTRAINT `alert_receivers_ibfk_1` FOREIGN KEY (`alert_id`) REFERENCES `alerts` (`alert_id`);
+
+--
+-- Constraints for table `reagent_stock`
+--
+ALTER TABLE `reagent_stock`
+  ADD CONSTRAINT `fk_reagent` FOREIGN KEY (`reagent_id`) REFERENCES `reagents` (`reagent_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stock_history`
+--
+ALTER TABLE `stock_history`
+  ADD CONSTRAINT `stock_history_ibfk_1` FOREIGN KEY (`reagent_id`) REFERENCES `reagents` (`reagent_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `stock_history_ibfk_2` FOREIGN KEY (`stock_id`) REFERENCES `reagent_stock` (`stock_id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
