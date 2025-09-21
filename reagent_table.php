@@ -23,11 +23,11 @@ $row = $result->fetch_array();
 $sql_reagent_stock = "SELECT * FROM reagent_stock WHERE reagent_id = $reagent_id";
 $result_reagent_stock = $conn->query($sql_reagent_stock);
 
-$sql_num_stock = "SELECT COUNT(*) AS num_stock FROM reagent_stock";
+$sql_num_stock = "SELECT COUNT(*) AS num_stock FROM reagent_stock WHERE reagent_id = '$reagent_id' AND stock_status = 'active'";
 $result_num_stock = $conn->query($sql_num_stock);
 $num_stocks = ($result_num_stock) ? $result_num_stock->fetch_assoc()['num_stock'] : 0;
 
-$sql_qty = "SELECT SUM(quantity) AS total_quantity FROM reagent_stock";
+$sql_qty = "SELECT SUM(quantity) AS total_quantity FROM reagent_stock WHERE reagent_id = '$reagent_id' AND stock_status = 'active'";
 $result_qty = $conn->query($sql_qty);
 $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0;
 
@@ -645,6 +645,85 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
             border-left: 4px solid #4CC9F0;
             padding-left: 10px;
         }
+
+        /* Delete Modal */
+        .delete-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .delete-modal-content {
+            background: #fff;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .delete-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .delete-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .delete-modal-body {
+            padding: 1rem;
+            font-size: 15px;
+            color: #333;
+            font-family: "Inter", sans-serif;
+        }
+
+        .delete-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 1rem;
+            border-top: 1px solid #ddd;
+        }
+
+        .cancel-btn,
+        .confirm-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            background: #eee;
+            color: #333;
+        }
+
+        .confirm-btn {
+            background: #e63946;
+            color: #fff;
+        }
+
+        .close-btn {
+            height: 28px;
+            width: 28px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -743,7 +822,7 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
                 <input type="text" class="searchbar-reagent" placeholder="Search Stocks for [Chemistry]">
             </div>
             <div class="add-item-section">
-                <button onclick="openDrawer('drawer')" class="add-item-btn">
+                <button id="openDrawerBtn" class="add-item-btn">
                     + ADD ITEM
                 </button>
             </div>
@@ -784,10 +863,10 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
                                 <td><span class="status ok">OK</span></td>
                                 <td><?php echo htmlspecialchars($stock['quantity']); ?></td>
                                 <td class="actions">
-                                    <button class="btn add" onclick="openDrawer('addStockDrawer')">+</button>
-                                    <button class="btn minus" onclick="openDrawer('removeStockDrawer')">-</button>
+                                    <button class="btn add" onclick="openDrawer('addStockDrawer', <?php echo $stock['stock_id'] ?>)">+</button>
+                                    <button class="btn minus" onclick="openDrawer('removeStockDrawer', <?php echo $stock['stock_id'] ?>)">-</button>
                                     <button class="btn edit">Edit</button>
-                                    <button class="btn delete">Delete</button>
+                                    <button class="btn delete" onclick="openDeleteModal(<?php echo $stock['stock_id']; ?>, <?php echo $reagent_id; ?>)">Delete</button>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -801,7 +880,7 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
         <div id="drawer" class="drawer">
             <div class="drawer-header">
                 <h2 class="title">Add Stock</h2>
-                <button onclick="closeDrawer('drawer')">&times;</button>
+                <button id="closeDrawerBtn">&times;</button>
             </div>
             <form action="add_stock.php" method="post">
                 <input type="hidden" name="reagent_id" value="<?php echo $reagent_id; ?>">
@@ -819,7 +898,7 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
                     <option value="Distributor B">Distributor B</option>
                 </select>
 
-                <label>Date Received</label>
+                <label>Date Arrived</label>
                 <input type="date" name="date_arrived">
 
                 <label>Expiry Date</label>
@@ -833,16 +912,14 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
         </div>
 
         <!-- Add Drawer -->
-        <!-- Add Stock Drawer -->
         <div id="addStockDrawer" class="drawer">
             <div class="drawer-header">
                 <h3 class="title">Add Stock</h3>
                 <button onclick="closeDrawer('addStockDrawer')">✖</button>
             </div>
             <form action="update_stock.php" method="POST">
-                <!-- Identify reagent -->
                 <input type="hidden" name="reagent_id" value="<?php echo $reagent_id; ?>">
-                <!-- <input type="hidden" name="stock_id" value="<?php echo $stock_form['stock_id']; ?>"> -->
+                <input type="hidden" name="stock_id" value="">
 
                 <input type="hidden" name="action_type" value="add">
 
@@ -871,7 +948,7 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
             </div>
             <form action="update_stock.php" method="POST">
                 <input type="hidden" name="reagent_id" value="<?php echo $reagent_id; ?>">
-                 <!-- <input type="hidden" name="stock_id" value="<?php echo $stock['stock_id']; ?>"> -->
+                <input type="hidden" name="stock_id" value="">
                 <input type="hidden" name="action_type" value="remove">
 
                 <label>Quantity to Remove</label>
@@ -891,6 +968,25 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
             </form>
         </div>
 
+        <!-- Delete Modal -->
+        <div id="delete-modal" class="delete-modal-overlay" style="display: none;">
+            <div class="delete-modal-content">
+                <div class="delete-modal-header">
+                    <h3>Confirm Deletion</h3>
+                    <img src="./images/close.png" alt="close-icon" onclick="closeDeleteModal()" class="close-btn">
+                </div>
+
+                <div class="delete-modal-body">
+                    <p>Are you sure you want to delete this stock? This action cannot be undone.</p>
+                </div>
+
+                <div class="delete-modal-footer">
+                    <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                    <button class="confirm-btn" onclick="deleteModalBackend()">Delete</button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -902,13 +998,24 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
         });
 
         // Drawer
+        const drawer = document.getElementById("drawer");
+        document.getElementById("openDrawerBtn").onclick = () => drawer.classList.add("open");
+        document.getElementById("closeDrawerBtn").onclick = () => drawer.classList.remove("open");
 
-        function openDrawer(id) {
-            document.getElementById(id).classList.add('open');
-        }
 
         function closeDrawer(id) {
             document.getElementById(id).classList.remove('open');
+        }
+
+        function openDrawer(drawerId, stockId) {
+            const drawer = document.getElementById(drawerId);
+            drawer.classList.add("open");
+
+            // Find the hidden input for stock_id inside this drawer
+            const stockInput = drawer.querySelector("input[name='stock_id']");
+            if (stockInput) {
+                stockInput.value = stockId;
+            }
         }
 
         // Notification Alerts Chatgpt
@@ -941,6 +1048,12 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
                     alertIcon.innerHTML = `
     <circle cx="12" cy="12" r="10" stroke="green" stroke-width="2" fill="none" />
     <path d="M8 12l2 2 4-4" stroke="green" stroke-width="2" fill="none" />`;
+                } else if (status === "success-delete") {
+                    alertTitle.textContent = "Success";
+                    alertMsg.textContent = message || "Stock is deleted successfully.";
+                    alertIcon.innerHTML = `
+    <circle cx="12" cy="12" r="10" stroke="green" stroke-width="2" fill="none" />
+    <path d="M8 12l2 2 4-4" stroke="green" stroke-width="2" fill="none" />`;
                 } else {
                     alertTitle.textContent = "Error";
                     alertMsg.textContent = message || "Something went wrong.";
@@ -961,6 +1074,24 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
                 }, 5000);
             }
         });
+
+        function openDeleteModal(deleteStockID) {
+            stockToDelete = deleteStockID;
+            document.getElementById("delete-modal").style.display = "flex";
+        }
+
+        function closeDeleteModal() {
+            document.getElementById("delete-modal").style.display = "none";
+        }
+
+        function deleteModalBackend(deleteStockID, reagentID) {
+            if (stockToDelete) {
+                // redirect to backend delete
+                location.href = "./delete_stock.php?id=" + stockToDelete + "&reagent_id=" + reagentID;
+            } else {
+                alert("No reagent selected for deletion!");
+            }
+        }
     </script>
 </body>
 

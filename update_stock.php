@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif ($action_type === "remove") {
         $stmt = $conn->prepare("UPDATE reagent_stock SET quantity = GREATEST(quantity - ?, 0) WHERE stock_id = ?");
     }
-    $stmt->bind_param("ii", $quantity, $reagent_id);
+    $stmt->bind_param("ii", $quantity, $stock_id);
     $stmt->execute();
     $stmt->close();
 
