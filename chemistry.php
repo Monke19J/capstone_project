@@ -18,18 +18,33 @@ if (isset($_SESSION['current_reagent_id'])) {
     unset($_SESSION['current_reagent_id']);
 }
 
-$sql_reagent_type = "SELECT COUNT(*) AS total_reagents FROM reagents";
+$sql_reagent_type = "SELECT COUNT(*) AS total_reagents 
+                     FROM reagents 
+                     WHERE reagent_status = 'active'";
 $result_reagent_type = $conn->query($sql_reagent_type);
 $total_reagents = ($result_reagent_type) ? $result_reagent_type->fetch_assoc()['total_reagents'] : 0;
 
-$sql_qty = "SELECT SUM(quantity) AS total_quantity FROM reagents";
+$sql_qty = "SELECT COUNT(*) AS total_quantity 
+            FROM reagent_stock 
+            WHERE stock_status = 'active'";
 $result_qty = $conn->query($sql_qty);
 $total_quantity = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0;
 
 $total_value = 0;
 
-$sql_card_value = "SELECT * FROM reagents WHERE reagent_type = 'chemistry'";
+$sql_card_value = "
+    SELECT r.*, COUNT(rs.stock_id) AS stock_count
+    FROM reagents r
+    LEFT JOIN reagent_stock rs 
+        ON r.reagent_id = rs.reagent_id 
+        AND rs.stock_status = 'active'
+    WHERE r.reagent_type = 'chemistry' 
+      AND r.reagent_status = 'active'
+    GROUP BY r.reagent_id
+";
 $result_card_value = $conn->query($sql_card_value);
+
+
 ?>
 
 <!DOCTYPE html>
@@ -1053,6 +1068,85 @@ $result_card_value = $conn->query($sql_card_value);
         .title-input:focus {
             border-bottom: 1px solid #4cafef;
         }
+
+        /* Delete Modal */
+        .delete-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .delete-modal-content {
+            background: #fff;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .delete-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .delete-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .delete-modal-body {
+            padding: 1rem;
+            font-size: 15px;
+            color: #333;
+            font-family: "Inter", sans-serif;
+        }
+
+        .delete-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 1rem;
+            border-top: 1px solid #ddd;
+        }
+
+        .cancel-btn,
+        .confirm-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            background: #eee;
+            color: #333;
+        }
+
+        .confirm-btn {
+            background: #e63946;
+            color: #fff;
+        }
+
+        .delete-close-btn {
+            height: 28px;
+            width: 28px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -1254,8 +1348,7 @@ $result_card_value = $conn->query($sql_card_value);
             <!-- Stats info -->
             <div class="info-section">
                 <div class="info-text">Items: <?php echo $total_reagents; ?></div>
-                <div class="info-text">Total Quantity: <?php echo $total_quantity; ?> units</div>
-                <div class="info-text">Total Value: <?php echo $total_value; ?> </div>
+                <div class="info-text">Total Quantity: <?php echo $total_quantity; ?> stocks</div>
             </div>
 
             <!-- Reagent Cards -->
@@ -1268,7 +1361,7 @@ $result_card_value = $conn->query($sql_card_value);
                             <p class="item-name text-gradient"><?php echo htmlspecialchars($row['category']); ?></p>
                             <div class="item-stock item-info-format">
                                 <img src="./images/item-stock.png" alt="" class="item-info-img">
-                                <p class="item-info-text"><?php echo $row['quantity'] . " " . $row['unit']; ?></p>
+                                <p class="item-info-text"><?php echo $row['stock_count']; ?> stock</p>
                             </div>
                             <div class="customize-card">
                                 <div class="edit-card">
@@ -1277,7 +1370,7 @@ $result_card_value = $conn->query($sql_card_value);
                                         data-name="<?php echo htmlspecialchars($row['reagent_name']); ?>"
                                         data-min="<?php echo $row['min_quantity']; ?>"
                                         data-category="<?php echo $row['category']; ?>"
-                                        data-img="<?php echo $row['reagent_img'] ?? './images/no_available_img.jpeg'; ?>"
+                                        data-img="./uploads/<?php echo $row['reagent_img'] ?? 'no_available_img.jpeg'; ?>"
                                         data-desc="<?php echo htmlspecialchars($row['item_description']); ?>"
                                         data-kit="<?php echo htmlspecialchars($row['test_kit']); ?>"
                                         data-pack="<?php echo htmlspecialchars($row['packaging']); ?>">
@@ -1286,7 +1379,7 @@ $result_card_value = $conn->query($sql_card_value);
                                 </div>
                                 <div class="edit-card">
                                     <button class="customize-btn">
-                                        <img class="customize-icon" src="./images/trash.png" alt="edit-icon">
+                                        <img class="customize-icon" src="./images/trash.png" alt="edit-icon" onclick="openDeleteModal(<?php echo $row['reagent_id'] ?>)">
                                     </button>
                                 </div>
                                 <div class="view-stock-card">
@@ -1390,6 +1483,25 @@ $result_card_value = $conn->query($sql_card_value);
                             <button type="submit" class="save-btn">Save Changes</button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Delete Modal -->
+            <div id="delete-modal" class="delete-modal-overlay" style="display: none;">
+                <div class="delete-modal-content">
+                    <div class="delete-modal-header">
+                        <h3>Confirm Deletion</h3>
+                        <img src="./images/close.png" alt="close-icon" onclick="closeDeleteModal()" class="delete-close-btn">
+                    </div>
+
+                    <div class="delete-modal-body">
+                        <p>Are you sure you want to delete this reagent? This action cannot be undone.</p>
+                    </div>
+
+                    <div class="delete-modal-footer">
+                        <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                        <button class="confirm-btn" onclick="deleteModalBackend()">Delete</button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -1528,9 +1640,11 @@ $result_card_value = $conn->query($sql_card_value);
                 document.getElementById('categorySelect').value = btn.dataset.category;
 
                 // Image
-                const preview = document.getElementById('preview');
+                const preview = document.getElementById('preview-edit');
                 preview.src = btn.dataset.img;
                 preview.style.display = 'block';
+
+
 
                 // Custom fields
                 document.getElementById('itemDescriptionInput').value = btn.dataset.desc || "";
@@ -1598,6 +1712,12 @@ $result_card_value = $conn->query($sql_card_value);
                 } else if (status === "success-edit") {
                     alertTitle.textContent = "Success";
                     alertMsg.textContent = message || "Reagent updated successfully.";
+                    alertIcon.innerHTML = `
+    <circle cx="12" cy="12" r="10" stroke="green" stroke-width="2" fill="none" />
+    <path d="M8 12l2 2 4-4" stroke="green" stroke-width="2" fill="none" />`;
+                } else if (status === "success-delete") {
+                    alertTitle.textContent = "Success";
+                    alertMsg.textContent = message || "Reagent deleted successfully.";
                     alertIcon.innerHTML = `
     <circle cx="12" cy="12" r="10" stroke="green" stroke-width="2" fill="none" />
     <path d="M8 12l2 2 4-4" stroke="green" stroke-width="2" fill="none" />`;
@@ -1708,6 +1828,25 @@ $result_card_value = $conn->query($sql_card_value);
                 uploadArea.querySelector("p").textContent = file.name;
             }
         });
+
+        // Delete Modal
+        function openDeleteModal(deleteReagentID) {
+            reagentToDelete = deleteReagentID;
+            document.getElementById("delete-modal").style.display = "flex";
+        }
+
+        function closeDeleteModal() {
+            document.getElementById("delete-modal").style.display = "none";
+        }
+
+        function deleteModalBackend(deleteReagentID) {
+            if (reagentToDelete) {
+                // redirect to backend delete
+                location.href = "./delete_reagent.php?id=" + reagentToDelete;
+            } else {
+                alert("No reagent selected for deletion!");
+            }
+        }
     </script>
 </body>
 
