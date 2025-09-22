@@ -20,13 +20,17 @@ if (isset($_SESSION['current_reagent_id'])) {
 
 $sql_reagent_type = "SELECT COUNT(*) AS total_reagents 
                      FROM reagents 
-                     WHERE reagent_status = 'active'";
+                     WHERE reagent_status = 'active' AND reagent_type = 'chemistry'";
 $result_reagent_type = $conn->query($sql_reagent_type);
 $total_reagents = ($result_reagent_type) ? $result_reagent_type->fetch_assoc()['total_reagents'] : 0;
 
-$sql_qty = "SELECT COUNT(*) AS total_quantity 
-            FROM reagent_stock 
-            WHERE stock_status = 'active'";
+$sql_qty = "
+    SELECT COUNT(*) AS total_quantity
+    FROM reagent_stock rs
+    JOIN reagents r ON rs.reagent_id = r.reagent_id
+    WHERE rs.stock_status = 'active'
+      AND r.reagent_type = 'chemistry'
+";
 $result_qty = $conn->query($sql_qty);
 $total_quantity = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0;
 
@@ -299,17 +303,6 @@ $result_card_value = $conn->query($sql_card_value);
             align-items: center;
             gap: 12px;
             padding-top: 5px;
-        }
-
-        .searchbar {
-            height: 36px;
-            width: 250px;
-            padding: 0 10px;
-            border: none;
-            border-radius: 8px;
-            outline: none;
-            background-color: #D9D9D9;
-
         }
 
         .icon-btn {
@@ -1186,16 +1179,16 @@ $result_card_value = $conn->query($sql_card_value);
                         </li>
                         <div class="submenu">
                             <a href="#" class="reagent-name submenu-active">Chemistry</a>
-                            <a href="#" class="reagent-name submenu-inactive">Hematology</a>
-                            <a href="#" class="reagent-name submenu-inactive">Immunology</a>
+                            <a href="./hematology.php" class="reagent-name submenu-inactive">Hematology</a>
+                            <a href="./immunology.php" class="reagent-name submenu-inactive">Immunology</a>
                         </div>
                         <li class="nav-inactive" style="padding-right: 30px;">
-                            <img src="./images/history.png" alt="History Icon" class="list-icon">
-                            <a href="" class="nav-listname">History</a>
+                            <img src="./images/history.png" alt="Inventory Icon" class="list-icon">
+                            <a href="./inventory.php" class="nav-listname">Inventory</a>
                         </li>
                         <li class="nav-inactive" style="padding-right: 30px;">
                             <img src="./images/client.png" alt="Client Icon" class="list-icon">
-                            <a href="" class="nav-listname">Clients</a>
+                            <a href="calendar.php" class="nav-listname">Calendar</a>
                         </li>
                     </ul>
                 </div>
@@ -1209,12 +1202,6 @@ $result_card_value = $conn->query($sql_card_value);
             <h1 id="header-title">Chemistry</h1>
 
             <div class="header-actions">
-                <input type="text" class="searchbar" placeholder="Search…">
-
-                <button class="icon-btn" aria-label="Messages">
-                    <img src="./images/message.png" alt="Message icon" class="list-icon">
-                </button>
-
                 <button class="icon-btn" aria-label="Notifications">
                     <img src="./images/notification.png" alt="Notification Bell" class="list-icon">
                 </button>
