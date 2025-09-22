@@ -761,17 +761,26 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
                             <a href="#" class="nav-listname">Reagents</a>
                         </li>
                         <div class="submenu">
-                            <a href="./chemistry.php" class="reagent-name submenu-active">Chemistry</a>
-                            <a href="#" class="reagent-name submenu-inactive">Hematology</a>
-                            <a href="#" class="reagent-name submenu-inactive">Immunology</a>
+                            <a href="./chemistry.php"
+                                class="reagent-name <?php echo ($row['reagent_type'] === 'chemistry') ? 'submenu-active' : 'submenu-inactive'; ?>">
+                                Chemistry
+                            </a>
+                            <a href="./hematology.php"
+                                class="reagent-name <?php echo ($row['reagent_type'] === 'hematology') ? 'submenu-active' : 'submenu-inactive'; ?>">
+                                Hematology
+                            </a>
+                            <a href="./immunology.php"
+                                class="reagent-name <?php echo ($row['reagent_type'] === 'immunology') ? 'submenu-active' : 'submenu-inactive'; ?>">
+                                Immunology
+                            </a>
                         </div>
                         <li class="nav-inactive" style="padding-right: 30px;">
                             <img src="./images/history.png" alt="History Icon" class="list-icon">
-                            <a href="" class="nav-listname">History</a>
+                            <a href="./inventory.php" class="nav-listname">Inventory</a>
                         </li>
                         <li class="nav-inactive" style="padding-right: 30px;">
                             <img src="./images/client.png" alt="Client Icon" class="list-icon">
-                            <a href="" class="nav-listname">Clients</a>
+                            <a href="./calendar.php" class="nav-listname">Calendar</a>
                         </li>
                     </ul>
                 </div>
@@ -783,7 +792,7 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
     <!-- Start of Header -->
     <div class="header">
         <ul class="breadcrumb">
-            <li><a href="./chemistry.php" id="header-title" style="text-decoration: none;">Chemistry</a></li>
+            <li><a href="<?php echo './' . $row['reagent_type'] . '.php' ?>" id="header-title" style="text-decoration: none;"><?php echo ucfirst(strtolower($row['reagent_type'])); ?></a></li>
             <li><a href="#"><?php echo $row['reagent_name'] ?></a></li>
         </ul>
 
@@ -911,7 +920,7 @@ $total_stocks = ($result_qty) ? $result_qty->fetch_assoc()['total_quantity'] : 0
             </form>
         </div>
 
-        <!-- Add Drawer -->
+        <!-- Add Stock Drawer -->
         <div id="addStockDrawer" class="drawer">
             <div class="drawer-header">
                 <h3 class="title">Add Stock</h3>

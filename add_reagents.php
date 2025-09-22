@@ -71,7 +71,15 @@ if ($reagent_type && $reagent_name && $min_quantity && $category) {
             $stmt->close();
         }
 
-        header("Location: ./chemistry.php?status=success");
+        if ($reagent_type === "chemistry") {
+            header("Location: ./chemistry.php?status=success");
+        } elseif ($reagent_type === "hematology") {
+            header("Location: ./hematology.php?status=success");
+        } elseif ($reagent_type === "immunology") {
+            header("Location: ./immunology.php?status=success");
+        } else {
+            header("Location: ./dashboard.php?status=success");
+        }
         exit();
     } else {
         $errorMsg = $stmt->error;
