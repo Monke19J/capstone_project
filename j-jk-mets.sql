@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 21, 2025 at 06:33 PM
+-- Generation Time: Sep 22, 2025 at 07:04 PM
 -- Server version: 11.5.2-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,10 +40,12 @@ CREATE TABLE `alerts` (
 --
 
 INSERT INTO `alerts` (`alert_id`, `reagent_id`, `alert_condition`, `min_quantity`, `created_at`) VALUES
-(1, 9, 'above', 3, '2025-09-12 13:33:35'),
-(2, 10, 'equal', 1, '2025-09-12 15:15:49'),
-(3, 11, 'equal', 5, '2025-09-19 07:30:20'),
-(4, 12, 'equal', 1234, '2025-09-19 10:36:48');
+(1, 1, 'equal', 100, '2025-09-22 08:31:37'),
+(2, 2, 'equal', 100, '2025-09-22 09:00:02'),
+(3, 3, 'equal', 200, '2025-09-22 09:00:35'),
+(4, 4, 'equal', 400, '2025-09-22 09:11:04'),
+(5, 5, 'equal', 40, '2025-09-22 10:09:09'),
+(6, 6, 'equal', 20, '2025-09-22 10:13:36');
 
 -- --------------------------------------------------------
 
@@ -57,18 +59,6 @@ CREATE TABLE `alert_receivers` (
   `receiver_type` varchar(50) DEFAULT NULL,
   `receiver_value` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `alert_receivers`
---
-
-INSERT INTO `alert_receivers` (`receiver_id`, `alert_id`, `receiver_type`, `receiver_value`) VALUES
-(1, 1, 'self', NULL),
-(2, 1, 'all_sales', NULL),
-(3, 1, 'all_engineering', NULL),
-(4, 1, 'everyone', NULL),
-(5, 1, 'user', 'testingEngineer'),
-(6, 2, 'self', NULL);
 
 -- --------------------------------------------------------
 
@@ -84,7 +74,7 @@ CREATE TABLE `reagents` (
   `category` varchar(50) NOT NULL COMMENT 'reagents,\r\ncalibrators,\r\ncontrols,\r\nelectrolyte,\r\nconsumables',
   `reagent_img` varchar(255) NOT NULL,
   `item_description` varchar(255) DEFAULT NULL,
-  `test_kit` varchar(100) DEFAULT NULL,
+  `test_kit` varchar(100) DEFAULT '0',
   `packaging` text DEFAULT NULL,
   `reagent_status` varchar(50) NOT NULL DEFAULT 'active' COMMENT 'active, inactive'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -94,18 +84,12 @@ CREATE TABLE `reagents` (
 --
 
 INSERT INTO `reagents` (`reagent_id`, `reagent_type`, `reagent_name`, `min_quantity`, `category`, `reagent_img`, `item_description`, `test_kit`, `packaging`, `reagent_status`) VALUES
-(1, 'chemistry', 'Reagent 1', 1, 'calibrators', 'uploads/1758471995_1.png', '', '', '', 'active'),
-(2, 'chemistry', 'Reagent 2', 1, 'reagents', 'uploads/1758472004_2.png', '', '', '', 'active'),
-(3, 'chemistry', 'Reagent 3', 1, 'calibrators', 'uploads/1758472012_3.png', '', '', '', 'active'),
-(4, 'chemistry', 'Reagent 4', 1, 'controls', 'uploads/1758472019_4.png', '', '', '', 'active'),
-(5, 'chemistry', 'Reagent 5', 1, 'consumables', 'uploads/1758472033_5.png', '', '', '', 'active'),
-(6, 'chemistry', 'Reagent 6', 123, 'reagents', 'uploads/1758472051_6.png', '', '', '', 'active'),
-(7, 'chemistry', 'Reagent 7', 1, 'electrolyte', 'uploads/1758472073_7.png', '', '', '', 'active'),
-(8, 'chemistry', 'Reagent 8', 20, 'consumables', 'uploads/1758472085_8.png', '', '', '', 'active'),
-(9, 'chemistry', 'Reagent 10', 3, 'consumables', 'uploads/1758472101_10.png', '', '', '', 'active'),
-(10, 'chemistry', 'omegalol', 1, 'reagents', './product_img/img_68c439257e40c1.71388137.jpg', '1', '1', '1', 'inactive'),
-(11, 'chemistry', 'testing', 5, 'reagents', './product_img/img_68cd068c919215.58265284.png', 'testing', 'testing', 'testing', 'active'),
-(12, 'chemistry', 'edit-good', 4567, 'controls', 'uploads/1758279527_m0bv61rf4im51.png', 'success', 'success', 'success', 'active');
+(1, 'chemistry', 'Chemistry 1', 100, 'reagents', './product_img/img_68d109697531f7.44508997.png', 'chestry 1', '12345', '', 'active'),
+(2, 'chemistry', 'Chemistry 2', 100, 'controls', './product_img/img_68d110128f3b28.82347067.png', 'Chemistry2', '', '', 'active'),
+(3, 'hematology', 'Hematology 3', 200, 'calibrators', './product_img/img_68d110332d8826.86056325.png', 'Hematology 3', '', '', 'active'),
+(4, 'hematology', 'Hematology 4', 400, 'calibrators', './product_img/img_68d112a82c2dd4.40350797.png', 'Hematology 4', '', '', 'active'),
+(5, 'hematology', 'Hematology 5', 40, 'calibrators', './product_img/img_68d12045c6e066.36270195.png', 'Hematology 5', '', '', 'active'),
+(6, 'immunology', 'Immunology 6', 20, 'controls', './product_img/img_68d1215089ffc3.76021987.png', 'Immunology 6', '', '', 'active');
 
 -- --------------------------------------------------------
 
@@ -131,12 +115,10 @@ CREATE TABLE `reagent_stock` (
 --
 
 INSERT INTO `reagent_stock` (`stock_id`, `reagent_id`, `lot_no`, `distributor`, `date_arrived`, `expiry_date`, `quantity`, `created_at`, `updated_at`, `stock_status`) VALUES
-(1, 1, '1', 'Distributor A', '2025-09-20', '2025-11-20', 51, '2025-09-20 15:12:36', '2025-09-21 16:13:54', 'active'),
-(2, 1, '2', 'Distributor B', '2025-09-21', '2025-12-29', 16, '2025-09-21 05:09:44', '2025-09-21 16:13:54', 'active'),
-(3, 11, '1234', 'Distributor A', '2025-09-21', '2025-12-31', 50, '2025-09-21 09:32:38', '2025-09-21 09:32:38', 'active'),
-(4, 1, '3', 'Distributor A', '2025-09-21', '2025-11-21', 40, '2025-09-21 12:32:23', '2025-09-21 16:13:54', 'active'),
-(5, 2, '69420', 'Distributor A', '2025-09-22', '2025-09-22', 100, '2025-09-21 16:01:47', '2025-09-21 16:13:54', 'active'),
-(6, 12, '1234', 'Distributor A', '2025-09-30', '2025-09-30', 10, '2025-09-21 16:28:59', '2025-09-21 16:29:07', 'inactive');
+(1, 1, '1', 'Distributor A', '2025-09-22', '2025-11-22', 100, '2025-09-22 10:09:57', '2025-09-22 10:12:25', 'active'),
+(2, 4, '111', 'Distributor B', '2025-09-23', '2026-03-23', 100, '2025-09-22 10:10:59', '2025-09-22 10:10:59', 'active'),
+(3, 6, '3', 'Distributor A', '2025-09-24', '2026-05-11', 500, '2025-09-22 10:14:37', '2025-09-22 10:14:37', 'active'),
+(4, 6, '1234', 'Distributor A', '2025-10-25', '2027-09-22', 1000, '2025-09-22 10:37:21', '2025-09-22 10:37:21', 'active');
 
 -- --------------------------------------------------------
 
@@ -161,25 +143,11 @@ CREATE TABLE `stock_history` (
 --
 
 INSERT INTO `stock_history` (`history_id`, `reagent_id`, `stock_id`, `action_type`, `quantity`, `client_id`, `date_action`, `created_at`, `remarks`) VALUES
-(1, 1, NULL, 'add', 10, 0, '2025-09-21', '2025-09-20 17:48:26', NULL),
-(2, 1, NULL, 'add', 20, 0, '2025-09-21', '2025-09-20 18:03:17', NULL),
-(3, 1, NULL, 'add', 10, 0, '2025-09-05', '2025-09-20 18:03:43', NULL),
-(4, 1, NULL, 'remove', 40, 0, '2025-09-22', '2025-09-20 18:04:08', NULL),
-(5, 1, NULL, 'add', 10, NULL, '2025-09-21', '2025-09-20 18:05:29', NULL),
-(6, 1, NULL, 'remove', 10, NULL, '2025-09-08', '2025-09-20 18:05:47', NULL),
-(7, 1, NULL, 'add', 10, NULL, '2025-09-04', '2025-09-20 18:06:25', NULL),
-(8, 1, NULL, 'add', 21, NULL, '2025-09-01', '2025-09-20 18:15:12', NULL),
-(9, 1, NULL, 'remove', 30, NULL, '2025-09-21', '2025-09-20 18:15:33', NULL),
-(14, 1, NULL, 'add', 21, NULL, '2025-09-21', '2025-09-20 18:43:49', NULL),
-(15, 1, NULL, 'add', 4, 0, '2025-09-21', '2025-09-21 05:10:15', NULL),
-(16, 1, NULL, 'add', 4, NULL, '2025-09-21', '2025-09-21 05:10:34', NULL),
-(17, 1, NULL, 'add', 4, 0, '2025-09-21', '2025-09-21 05:15:33', NULL),
-(18, 1, NULL, 'add', 4, NULL, '2025-09-21', '2025-09-21 05:15:51', NULL),
-(19, 1, NULL, 'add', 4, NULL, '2025-09-02', '2025-09-21 12:02:46', NULL),
-(20, 1, 4, 'add', 20, 0, '2025-09-21', '2025-09-21 12:34:45', NULL),
-(21, 1, 4, 'remove', 20, 0, '2025-09-21', '2025-09-21 12:36:30', NULL),
-(22, 1, 4, 'add', 15, NULL, '2025-09-30', '2025-09-21 15:29:16', NULL),
-(23, 1, 4, 'add', 15, NULL, '2025-09-30', '2025-09-21 15:29:43', NULL);
+(1, 1, 1, 'add', 500, 0, '2025-09-22', '2025-09-22 10:09:57', NULL),
+(2, 4, 2, 'add', 100, 0, '2025-09-23', '2025-09-22 10:10:59', NULL),
+(3, 1, 1, 'remove', 400, 0, '2025-09-24', '2025-09-22 10:12:25', NULL),
+(4, 6, 3, 'add', 500, 0, '2025-09-24', '2025-09-22 10:14:37', NULL),
+(5, 6, 4, 'add', 1000, 0, '2025-10-25', '2025-09-22 10:37:21', NULL);
 
 -- --------------------------------------------------------
 
@@ -256,31 +224,31 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `alerts`
 --
 ALTER TABLE `alerts`
-  MODIFY `alert_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `alert_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `alert_receivers`
 --
 ALTER TABLE `alert_receivers`
-  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `reagents`
 --
 ALTER TABLE `reagents`
-  MODIFY `reagent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `reagent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `reagent_stock`
 --
 ALTER TABLE `reagent_stock`
-  MODIFY `stock_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `stock_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `stock_history`
 --
 ALTER TABLE `stock_history`
-  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `users`
